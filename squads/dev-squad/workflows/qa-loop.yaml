@@ -1,0 +1,94 @@
+workflow:
+  id: qa-loop
+  name: QA Loop - Review Fix Re-review Cycle
+  squad: dev-squad
+  version: "1.0"
+  description: >-
+    Automated QA loop that orchestrates review → fix → re-review cycle.
+    Runs up to maxIterations (default 5). Escalates when max reached.
+
+  type: loop
+
+  config:
+    maxIterations: 5
+    reviewTimeout: 1800000
+    fixTimeout: 3600000
+    maxRetries: 2
+
+  sequence:
+    - step: review
+      phase: 1
+      skill: qa
+      description: "Execute comprehensive QA review"
+      outputs: [gate-file.yaml, verdict, issuesFound]
+      on_success:
+        next: check_verdict
+      on_failure:
+        action: retry
+
+    - step: check_verdict
+      phase: 2
+      description: "Evaluate review verdict"
+      condition_check:
+        - condition: "verdict == 'APPROVE'"
+          action: complete
+        - condition: "verdict == 'BLOCKED'"
+          action: escalate
+        - condition: "verdict == 'REJECT'"
+          next: create_fix_request
+
+    - step: create_fix_request
+      phase: 3
+      skill: qa
+      description: "Generate structured fix request from review findings"
+      outputs: [fix-request.md]
+      on_success:
+        next: fix_issues
+
+    - step: fix_issues
+      phase: 4
+      skill: dev
+      description: "Developer applies fixes based on fix request"
+      outputs: [fixes-applied.json]
+      on_success:
+        next: increment_iteration
+      on_failure:
+        action: escalate
+
+    - step: increment_iteration
+      phase: 5
+      description: "Check iteration count"
+      condition_check:
+        - condition: "currentIteration >= maxIterations"
+          action: escalate
+          reason: "Max iterations reached"
+        - condition: "currentIteration < maxIterations"
+          next: review
+
+  escalation:
+    triggers:
+      - max_iterations_reached
+      - verdict_blocked
+      - fix_failure
+    action:
+      status: "escalated"
+      notification: |
+        QA Loop Escalation for {storyId}
+        Iterations: {currentIteration}/{maxIterations}
+        Last verdict: {lastVerdict}
+
+  control:
+    stop:
+      command: "*stop-qa-loop"
+    resume:
+      command: "*resume-qa-loop"
+    reset:
+      command: "*qa-loop --reset"
+
+  metadata:
+    author: "Operabase port"
+    version: 1.0.0
+    tags:
+      - qa-loop
+      - orchestration
+      - autonomous

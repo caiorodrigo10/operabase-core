@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "_description": "Operabase folder structure template. Source of truth for the installer. Each entry is a directory to create. Files with 'template' point to src/templates/ for content.",
+  "directories": [
+    {
+      "path": ".claude/skills",
+      "description": "Skills (agents + capabilities) — each skill is a folder with SKILL.md"
+    },
+    {
+      "path": ".claude/commands",
+      "description": "Command aliases — namespace per squad, invoke skills"
+    },
+    {
+      "path": ".claude/hooks",
+      "description": "Claude Code hooks — pre-commit, pre-push gate enforcement"
+    },
+    {
+      "path": ".operabase",
+      "description": "Runtime state directory (hidden)",
+      "gitignore": {
+        "entries": [
+          "state.json",
+          "cache/"
+        ],
+        "comment": "manifest.json is committed; state.json and cache/ are local-only"
+      }
+    },
+    {
+      "path": "memory",
+      "description": "Global memory — shared context across sessions",
+      "files": [
+        {
+          "name": "MEMORY.md",
+          "template": "memory-template.md"
+        }
+      ]
+    },
+    {
+      "path": "squads",
+      "description": "Expansion packs — populated by installer based on user selections"
+    },
+    {
+      "path": "docs/stories/active",
+      "description": "Active development stories"
+    },
+    {
+      "path": "docs/stories/completed",
+      "description": "Completed development stories"
+    },
+    {
+      "path": "docs/knowledge",
+      "description": "Global knowledge base — benchmarks, research, references"
+    }
+  ],
+  "conditional": [
+    {
+      "condition": "multi_tenant",
+      "directories": [
+        {
+          "path": "tenants/_templates",
+          "description": "Tenant YAML templates — business-model, finance, media-buying"
+        }
+      ]
+    }
+  ],
+  "root_files": [
+    {
+      "name": "operabase.yaml",
+      "template": "operabase-template.yaml",
+      "description": "Central project configuration"
+    },
+    {
+      "name": "constitution.md",
+      "source": "constitution.md",
+      "description": "Formal constitution with non-negotiable principles"
+    }
+  ],
+  "operabase_files": [
+    {
+      "path": ".operabase/manifest.json",
+      "description": "SHA-256 hashes of installed files — committed to git",
+      "default_content": {
+        "version": "0.1.0-beta",
+        "created_at": null,
+        "files": {}
+      }
+    },
+    {
+      "path": ".operabase/.gitignore",
+      "content": "# Local-only state — do not commit\nstate.json\ncache/\n"
+    }
+  ]
+}

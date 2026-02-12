@@ -1,0 +1,157 @@
+# =============================================================================
+# TENANT TEMPLATE: MEDIA BUYING
+# =============================================================================
+# Operabase Skills Framework
+# Copy this file to tenants/{tenant-id}/media-buying.yaml
+# Fill in all required fields before using
+# =============================================================================
+
+tenant:
+  id: "{tenant-id}"           # Unique identifier (lowercase, no spaces)
+  name: "{Company Name}"       # Display name
+  created_at: "YYYY-MM-DD"
+  updated_at: "YYYY-MM-DD"
+
+# =============================================================================
+# BUSINESS CONTEXT
+# =============================================================================
+
+business:
+  description: |
+    Brief description of the business and what they do.
+
+  type: []                    # educacao | infoproduto | eventos | ecommerce | saas | servicos
+  vertical: ""                # marketing-digital | saude | financas | etc
+  sub_vertical: ""            # More specific niche
+
+  target_audience:
+    type: "B2C"               # B2C | B2B | B2B2C
+    persona: ""               # Main persona description
+    pain_points: []           # List of main pain points
+    age_range: ""             # e.g., "25-35"
+    gender: ""                # predominantemente masculino | feminino | equilibrado
+
+  competitors: []             # List of main competitors
+
+  experts: []                 # List of experts/founders
+    # - name: ""
+    #   role: ""
+
+  team: []                    # Team members
+    # - name: ""
+    #   role: ""
+    #   email: ""
+    #   whatsapp: ""
+
+# =============================================================================
+# PLATFORM CONNECTIONS
+# =============================================================================
+
+posthog:
+  project_id: ""              # PostHog project ID
+  project_name: ""            # PostHog project name
+  timezone: "UTC"
+
+meta_ads:
+  account_id: ""              # Meta Ads account ID (required)
+  account_name: ""            # Meta Ads account name
+  pixel_id: ""                # Meta Pixel ID (optional)
+  currency: "BRL"             # BRL | USD
+
+google_ads:
+  customer_id: ""             # Google Ads customer ID (optional)
+  account_name: ""            # Google Ads account name
+  status: "not_connected"     # connected | not_connected
+
+# =============================================================================
+# CURRENCY CONVERSION (if ads account is in different currency than product)
+# =============================================================================
+
+currency:
+  ads_currency: "BRL"         # Currency of ads account
+  product_currency: "BRL"     # Currency of product sales
+  conversion_rate: 1.0        # Fixed rate for conversions
+  conversion_note: ""         # Notes about conversion
+
+# =============================================================================
+# PRODUCTS / CAMPAIGNS
+# =============================================================================
+
+products:
+  - id: "{product-id}"
+    name: "{Product Name}"
+    type: "high-ticket-service"  # high-ticket-service | low-ticket-infoproduct | webinar-launch | paid-event | ecommerce
+    status: "active"             # active | paused | archived
+
+    details:
+      description: |
+        Product description.
+      format: ""                 # evento-online | curso | mentoria | servico
+      duration: ""               # e.g., "2 dias", "8 semanas"
+
+      front_end:
+        name: ""
+        price: 0.00
+        currency: "BRL"
+
+      back_end:
+        name: ""
+        price: 0.00
+        currency: "BRL"
+        type: ""                 # mentoria | curso | servico
+
+      landing_page:
+        url: ""
+        type: ""                 # checkout-direto | captura-lead
+
+    targets:
+      objective: "break_even"    # break_even | profit | volume_scale
+      cpa_target: null           # R$ - Maximum cost per acquisition
+      cpl_target: null           # R$ - Maximum cost per lead
+      roas_target: 1.0           # 1.0 = break-even
+      ltv_expected: null         # R$ - Expected customer lifetime value
+
+    funnel:
+      stage: "front_end"         # front_end | back_end | full_funnel
+      monetization: "back_end"   # front_end | back_end | both
+      strategy: |
+        Describe the funnel strategy.
+      notes: ""
+
+    budget:
+      total: 0.00
+      currency: "BRL"
+      period: "campaign"         # campaign | monthly | weekly
+      start_date: ""
+      end_date: ""
+      daily_average: 0.00
+
+    challenges: []               # Current challenges
+      # - type: ""
+      #   description: ""
+      #   severity: "high"       # high | medium | low
+
+    campaigns: []                # Active campaigns
+      # - id: ""
+      #   name: ""
+      #   stage: "bof"           # tof | mof | bof | ret
+      #   objective: "conversions"
+      #   audience: "cold"       # cold | warm | hot
+      #   status: "active"
+
+# =============================================================================
+# ANALYSIS NOTES
+# =============================================================================
+
+analysis_notes: |
+  Notes for the agent when analyzing this tenant.
+
+# =============================================================================
+# CHANGELOG
+# =============================================================================
+
+changelog:
+  - date: "YYYY-MM-DD"
+    author: ""
+    action: "created"
+    notes: "Initial creation"

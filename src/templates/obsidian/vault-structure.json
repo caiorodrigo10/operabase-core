@@ -1,0 +1,23 @@
+{
+  "directories": [
+    "00-Inbox",
+    "01-Projects",
+    "03-Resources",
+    "03-Resources/til",
+    "03-Resources/links",
+    "04-Archive",
+    "05-Daily",
+    "08-Journal"
+  ],
+  "files": {
+    "Home.md": "Home.md"
+  },
+  "gitkeep": [
+    "00-Inbox",
+    "01-Projects",
+    "03-Resources",
+    "04-Archive",
+    "05-Daily",
+    "08-Journal"
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "name": "operabase",
+  "version": "0.1.0-beta",
+  "description": "Skills-first agent framework for Claude Code",
+  "type": "module",
+  "bin": {
+    "operabase": "./bin/operabase.js"
+  },
+  "scripts": {
+    "validate": "node bin/operabase.js validate",
+    "status": "node bin/operabase.js status"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "claude-code",
+    "ai-agents",
+    "skills",
+    "framework"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@inquirer/prompts": "^5.0.0",
+    "ajv": "^8.12.0",
+    "chalk": "^5.3.0",
+    "commander": "^12.0.0",
+    "js-yaml": "^4.1.0"
+  }
+}

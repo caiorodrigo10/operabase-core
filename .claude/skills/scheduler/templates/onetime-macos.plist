@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.claude.schedule.once.{ID}</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <string>TARGET={TIMESTAMP}; NOW=$(date +%s); if [ $NOW -ge $TARGET ]; then cd "{WORKING_DIR}" &amp;&amp; {CLAUDE_PATH} -p "{PROMPT}" {FLAGS} >> "$HOME/.claude/logs/once.{ID}.log" 2>&amp;1; rm "$HOME/Library/LaunchAgents/com.claude.schedule.once.{ID}.plist" 2>/dev/null; launchctl bootout gui/$(id -u)/com.claude.schedule.once.{ID} 2>/dev/null; fi</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/opt/homebrew/bin:{HOME}/.local/bin</string>
+        <key>HOME</key>
+        <string>{HOME}</string>
+    </dict>
+    <key>StartInterval</key>
+    <integer>30</integer>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/tmp/claude-schedule-once.{ID}.out</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/claude-schedule-once.{ID}.err</string>
+</dict>
+</plist>

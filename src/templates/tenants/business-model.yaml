@@ -1,0 +1,268 @@
+# =============================================================================
+# TENANT TEMPLATE: BUSINESS-MODEL
+# =============================================================================
+# Operabase Skills Framework
+# Copy this file to tenants/{tenant-id}/business-model.yaml
+# Methodology: First Principles Business Planning
+# Agent: @businessplan (Atlas)
+# =============================================================================
+
+tenant:
+  id: "{tenant-id}"
+  name: "{Company Name}"
+  created_at: "YYYY-MM-DD"
+  updated_at: "YYYY-MM-DD"
+
+# =============================================================================
+# PHASE 0: CONTEXTO
+# =============================================================================
+
+context:
+  business_type: ""           # saas | ecommerce | services | education | marketplace | other
+  stage: ""                   # idea | mvp | traction | scale
+  plan_objective: ""          # clarity | fundraising | team_alignment | other
+  funding_model: ""           # bootstrap | investment | hybrid | undecided
+  currency: "BRL"
+
+# =============================================================================
+# PHASE 1: PROBLEMA (First Principles)
+# =============================================================================
+
+problem:
+  statement: ""
+
+  five_whys:
+    why1: ""
+    why2: ""
+    why3: ""
+    why4: ""
+    why5: ""
+
+  quantification:
+    affected_people: null       # Estimated number
+    frequency: ""               # How often they face this
+    cost_of_not_solving: ""     # Time, money, pain
+
+  validation:
+    conversations: 0            # Number of customer conversations
+    key_insights: []
+
+# =============================================================================
+# PHASE 2: CLIENTE (ICP)
+# =============================================================================
+
+customer:
+  icp_one_liner: ""
+
+  primary_segment:
+    demographics: ""
+    psychographics: ""
+    behaviors: ""
+    triggers: ""
+
+  anti_persona:
+    description: ""
+    why_not_customer: ""
+
+  jobs_to_be_done:
+    - situation: ""
+      motivation: ""
+      outcome: ""
+
+  where_online: []              # Where they spend time
+  search_terms: []              # What they Google
+
+# =============================================================================
+# PHASE 3: SOLUCAO (UVP)
+# =============================================================================
+
+solution:
+  uvp:
+    for_customer: ""
+    who_has_problem: ""
+    our_product: ""
+    is_category: ""
+    that_provides: ""
+    unlike_alternatives: ""
+    because: ""
+
+  mvp_scope:
+    must_have: []
+    nice_to_have: []
+    not_doing: []
+
+  manual_version: ""            # How to solve without tech
+
+# =============================================================================
+# PHASE 4: MODELO DE RECEITA
+# =============================================================================
+
+revenue:
+  model: ""                     # subscription | transaction | freemium | marketplace | usage | hybrid
+
+  pricing:
+    ticket: 0.00
+    currency: "BRL"
+    frequency: ""               # monthly | yearly | one-time | per-use
+
+  value_capture:
+    customer_value: 0.00        # What customer gains/saves
+    capture_percentage: 0       # % of value captured as price
+
+  competitive_pricing:
+    alternatives_price: 0.00
+    our_positioning: ""         # premium | competitive | budget
+
+# =============================================================================
+# PHASE 5: CANAIS & AQUISICAO
+# =============================================================================
+
+channels:
+  discovery:                    # How they find you
+    primary: ""
+    secondary: []
+
+  consideration:                # How they evaluate
+    touchpoints: []
+
+  conversion:                   # How they buy
+    model: ""                   # self-serve | sales | hybrid
+
+  growth_preference: ""         # money (paid) | time (organic)
+  channel_expertise: []         # Channels you know well
+
+  unit_economics:
+    cac_estimate: 0.00
+    ltv_estimate: 0.00
+    ltv_cac_ratio: 0.0          # Target: >3
+    payback_months: 0
+
+# =============================================================================
+# PHASE 6: OPERACOES
+# =============================================================================
+
+operations:
+  delivery:
+    process_1_customer: ""
+    process_100_customers: ""
+
+  resources:
+    must_do_internally: []
+    can_outsource: []
+
+  costs:
+    current_biggest: ""
+    future_biggest: ""
+
+  scalability:
+    breaks_first: ""            # What breaks when you grow
+
+# =============================================================================
+# PHASE 7: VANTAGEM COMPETITIVA (MOAT)
+# =============================================================================
+
+moat:
+  type: ""                      # network | switching | brand | scale | data | expertise | regulatory | community
+  description: ""
+
+  defensibility:
+    google_test: ""             # Why customers stay if Google enters
+    two_year_advantage: ""      # What makes you stronger over time
+    grows_vs_dilutes: ""        # Does moat grow or fade?
+
+# =============================================================================
+# PHASE 8: FINANCEIRO
+# =============================================================================
+
+financial:
+  projections:
+    year_1:
+      customers: 0
+      revenue: 0.00
+      costs: 0.00
+      result: 0.00
+    year_2:
+      customers: 0
+      revenue: 0.00
+      costs: 0.00
+      result: 0.00
+    year_3:
+      customers: 0
+      revenue: 0.00
+      costs: 0.00
+      result: 0.00
+
+  scenarios:
+    conservative: {}
+    base: {}
+    optimistic: {}
+
+  # Only if fundraising
+  fundraising:
+    enabled: false
+    amount_needed: 0.00
+    runway_months: 0
+    use_of_funds:
+      product_pct: 0
+      marketing_pct: 0
+      team_pct: 0
+      operations_pct: 0
+    milestones_for_next_round: []
+
+# =============================================================================
+# ASSUMPTIONS (To Validate)
+# =============================================================================
+
+assumptions:
+  validated: []
+  to_validate:
+    - assumption: ""
+      validation_method: ""
+      status: "pending"         # pending | validated | invalidated
+
+# =============================================================================
+# PHASE PROGRESS
+# =============================================================================
+
+progress:
+  fase0_context: "pending"      # pending | in_progress | completed
+  fase1_problem: "pending"
+  fase2_customer: "pending"
+  fase3_solution: "pending"
+  fase4_revenue: "pending"
+  fase5_channels: "pending"
+  fase6_operations: "pending"
+  fase7_moat: "pending"
+  fase8_financial: "pending"
+  fase9_synthesis: "pending"
+
+  last_phase_completed: null
+  last_updated: null
+
+# =============================================================================
+# OUTPUTS GENERATED
+# =============================================================================
+
+outputs:
+  lean_canvas:
+    generated: false
+    path: ""
+  pitch_deck:
+    generated: false
+    path: ""
+  one_pager:
+    generated: false
+    path: ""
+  full_plan:
+    generated: false
+    path: ""
+
+# =============================================================================
+# CHANGELOG
+# =============================================================================
+
+changelog:
+  - date: "YYYY-MM-DD"
+    author: ""
+    action: "created"
+    notes: "Initial creation"

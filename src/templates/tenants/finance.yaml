@@ -1,0 +1,175 @@
+# =============================================================================
+# TENANT TEMPLATE: FINANCE
+# =============================================================================
+# Operabase Skills Framework
+# Copy this file to tenants/{tenant-id}/finance.yaml
+# Fill in all required fields before using
+# Methodology: Profit First
+# =============================================================================
+
+tenant:
+  id: "{tenant-id}"           # Unique identifier (lowercase, no spaces)
+  name: "{Company Name}"       # Display name
+  created_at: "YYYY-MM-DD"
+  updated_at: "YYYY-MM-DD"
+
+# =============================================================================
+# BUSINESS CONTEXT
+# =============================================================================
+
+business:
+  description: |
+    Brief description of the business.
+
+  type: ""                    # servicos | educacao | saas | ecommerce | consultoria
+  stage: "startup"            # startup (0-250k) | growth (250k-1M) | scale (1M-5M) | expansion (5M+)
+  currency: "BRL"             # BRL | USD
+  tax_status: "normal"        # normal | non-etbus | simples | mei
+
+# =============================================================================
+# PROFIT FIRST - TAPs (Target Allocation Percentages)
+# =============================================================================
+
+profit_first:
+  methodology: "profit-first"
+
+  accounts:
+    income:
+      percentage: 100
+      description: "Toda receita entra aqui"
+
+    profit:
+      percentage: 5           # 1-20% depending on stage
+      description: "Lucro primeiro (distribuicao trimestral)"
+      distribution_frequency: "quarterly"  # quarterly | monthly
+      distribution_split:
+        owner_bonus: 50       # % for owner celebration
+        hold_reserve: 50      # % for long-term reserve
+
+    owners_pay:
+      percentage: 30          # 10-50% depending on stage
+      description: "Salario do dono"
+      monthly_target: 0.00    # R$ - Minimum needed
+      excess_to: "personal_reserve"  # What to do with excess
+
+    tax:
+      percentage: 0           # 0-15% depending on tax status
+      description: "Reserva para impostos"
+      enabled: false          # true | false
+
+    opex:
+      percentage: 65          # Remaining for operations
+      description: "Despesas operacionais"
+
+      allocation:
+        fixed_costs: 0.00     # R$/month - Rent, software, etc
+        marketing_reinvestment: 60  # % of OPEX for ads/marketing
+        reserve_excess: true  # Send excess to RESERVA
+
+    reserva:
+      percentage: null        # Fed by OPEX excess (not fixed %)
+      description: "Reserva de emergencia (runway)"
+      target: 0.00            # R$ - Target amount (3 months burn)
+      source: "opex_excess"   # Where it comes from
+
+# =============================================================================
+# BURN RATE & RUNWAY
+# =============================================================================
+
+burn_rate:
+  personal:
+    monthly_need: 0.00        # R$ - Personal monthly expenses
+    description: "Custo de vida pessoal"
+
+  business:
+    monthly_fixed: 0.00       # R$ - Fixed business costs (no ads)
+    description: "Custos fixos da empresa"
+
+  total_monthly: 0.00         # R$ - Total burn rate
+
+runway:
+  target_months: 3            # How many months of runway desired
+  target_amount: 0.00         # R$ - burn_rate.total_monthly * target_months
+  current_amount: 0.00        # R$ - Current runway saved
+  status: "building"          # building | achieved | critical
+
+# =============================================================================
+# PRODUCTS & UNIT ECONOMICS
+# =============================================================================
+
+products:
+  - id: "{product-id}"
+    name: "{Product Name}"
+    type: "service"           # service | course | consulting | product
+    status: "active"          # active | development | retired
+
+    pricing:
+      ticket: 0.00            # R$ - Price per sale
+      currency: "BRL"
+
+    unit_economics:
+      cost_of_delivery: 0.00  # R$ - Cost to deliver
+      margin_percentage: 100  # % - (ticket - cost) / ticket * 100
+
+    acquisition:
+      cpl_target: null        # R$ - Cost per lead (if applicable)
+      cpa_target: null        # R$ - Cost per acquisition
+      conversion_rate: null   # % - Lead to customer conversion
+
+# =============================================================================
+# PROJECTIONS
+# =============================================================================
+
+projections:
+  current_period: "2026-02"
+
+  monthly:
+    revenue_target: 0.00      # R$ - Monthly revenue goal
+    clients_target: 0         # Number of clients/sales
+
+  rules:
+    reinvestment_percentage: 60  # % of OPEX to reinvest in marketing
+    min_roi_for_scale: 3.0       # Minimum ROI to consider "good"
+
+# =============================================================================
+# INTEGRATIONS
+# =============================================================================
+
+integrations:
+  notion:
+    workspace_id: ""
+    databases:
+      transactions: ""        # Database ID for transactions
+      categories: ""          # Database ID for categories
+      accounts: ""            # Database ID for accounts
+      periods: ""             # Database ID for periods
+      clients: ""             # Database ID for clients
+    status: "not_connected"   # connected | not_connected
+
+  bank:
+    provider: ""              # mercury | relay | nubank | etc
+    accounts: []              # List of connected accounts
+    status: "not_connected"
+
+# =============================================================================
+# ANALYSIS NOTES
+# =============================================================================
+
+analysis_notes: |
+  Notes for the finance agent when analyzing this tenant.
+
+  ## Key Metrics to Monitor
+  - Profit percentage
+  - Days of cash (runway)
+  - Owner's pay consistency
+  - OPEX vs revenue ratio
+
+# =============================================================================
+# CHANGELOG
+# =============================================================================
+
+changelog:
+  - date: "YYYY-MM-DD"
+    author: ""
+    action: "created"
+    notes: "Initial creation"

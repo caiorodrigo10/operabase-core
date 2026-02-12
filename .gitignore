@@ -1,0 +1,5 @@
+node_modules/
+.operabase/state.json
+.operabase/cache/
+.DS_Store
+*.log

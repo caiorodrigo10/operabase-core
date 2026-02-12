@@ -1,0 +1,280 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://operabase.dev/schemas/operabase.schema.json",
+  "title": "Operabase Configuration",
+  "description": "JSON Schema for operabase.yaml - the central configuration file for an Operabase project.",
+  "type": "object",
+  "required": ["version", "name", "language"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version of the configuration file.",
+      "examples": ["1.0"]
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the project.",
+      "minLength": 1,
+      "examples": ["My Project"]
+    },
+    "language": {
+      "type": "string",
+      "description": "Primary language for agent interactions and output.",
+      "enum": ["en", "pt", "es"]
+    },
+    "multi_tenant": {
+      "type": "boolean",
+      "description": "Enable multi-tenant mode. When true, agents must identify the tenant context before operating.",
+      "default": false
+    },
+    "tenant_discovery": {
+      "type": "string",
+      "description": "How tenants are discovered.",
+      "enum": ["filesystem"],
+      "default": "filesystem"
+    },
+    "tenant_gate": {
+      "type": "string",
+      "description": "Whether tenant identification is mandatory or optional.",
+      "enum": ["mandatory", "optional"],
+      "default": "mandatory"
+    },
+    "composio": {
+      "type": "object",
+      "description": "Composio integration settings for external APIs.",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "memory": {
+      "type": "object",
+      "description": "Memory system configuration.",
+      "properties": {
+        "global": {
+          "type": "string",
+          "description": "Path to the global shared memory file.",
+          "default": "memory/MEMORY.md"
+        },
+        "squad_pattern": {
+          "type": "string",
+          "description": "Pattern for squad-specific agent memory files.",
+          "default": "squads/{squad}/memory/{agent}.md"
+        }
+      },
+      "additionalProperties": false
+    },
+    "obsidian": {
+      "type": "object",
+      "description": "Obsidian vault integration (second brain).",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "vault_path": {
+          "type": "string",
+          "description": "Path to the Obsidian vault (relative or absolute)."
+        },
+        "vault_name": {
+          "type": "string",
+          "description": "Display name for the vault."
+        },
+        "date_format": {
+          "type": "string",
+          "description": "Date format for daily notes.",
+          "default": "DD-MM-YYYY"
+        },
+        "structure": {
+          "type": "object",
+          "description": "Vault folder structure mapping.",
+          "properties": {
+            "inbox": { "type": "string", "default": "00-Inbox" },
+            "projects": { "type": "string", "default": "01-Projects" },
+            "resources": { "type": "string", "default": "03-Resources" },
+            "daily": { "type": "string", "default": "05-Daily" },
+            "journal": { "type": "string", "default": "08-Journal" }
+          },
+          "additionalProperties": false
+        },
+        "vault_git": {
+          "description": "Whether to version the vault in Git. true/false/partial.",
+          "oneOf": [
+            { "type": "boolean" },
+            { "type": "string", "enum": ["partial"] }
+          ],
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "rag": {
+      "type": "object",
+      "description": "RAG (Retrieval Augmented Generation) configuration.",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "provider": {
+          "type": "string",
+          "description": "Embedding provider.",
+          "enum": ["auto", "local", "openai", "gemini"],
+          "default": "auto"
+        },
+        "auto_index": {
+          "type": "boolean",
+          "default": true
+        },
+        "index_paths": {
+          "type": "array",
+          "description": "Glob patterns of paths to index.",
+          "items": { "type": "string" }
+        },
+        "search_defaults": {
+          "type": "object",
+          "properties": {
+            "max_results": { "type": "integer", "default": 6 },
+            "vector_weight": { "type": "number", "default": 0.7 },
+            "text_weight": { "type": "number", "default": 0.3 }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "error_handling": {
+      "type": "object",
+      "description": "Default error handling strategies for agents.",
+      "properties": {
+        "default_strategy": {
+          "type": "string",
+          "description": "Default strategy when an error occurs.",
+          "enum": ["RETRY", "ESCALATE", "SKIP"],
+          "default": "ESCALATE"
+        },
+        "retryable_errors": {
+          "type": "array",
+          "description": "Error types that should trigger a retry.",
+          "items": { "type": "string" },
+          "default": ["timeout", "rate_limit", "ECONNRESET"]
+        },
+        "max_retries": {
+          "type": "integer",
+          "description": "Maximum number of retries for retryable errors.",
+          "default": 2,
+          "minimum": 0
+        },
+        "retry_delay_seconds": {
+          "type": "integer",
+          "description": "Delay between retries in seconds.",
+          "default": 5,
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "squads": {
+      "type": "object",
+      "description": "Installed squads configuration.",
+      "properties": {
+        "core": {
+          "type": "array",
+          "description": "Core development squads (dev-squad or full-dev-squad).",
+          "items": { "type": "string" }
+        },
+        "extras": {
+          "type": "array",
+          "description": "Additional domain-specific squads.",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "agents": {
+      "type": "object",
+      "description": "Active agents configuration (auto-generated based on squads).",
+      "properties": {
+        "always": {
+          "type": "array",
+          "description": "Agents that are always active.",
+          "items": { "type": "string" }
+        },
+        "dev": {
+          "type": "array",
+          "description": "Development agents.",
+          "items": { "type": "string" }
+        },
+        "extras": {
+          "type": "array",
+          "description": "Extra domain agents.",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "gates": {
+      "type": "object",
+      "description": "Quality gates configuration. Commands to run at each stage.",
+      "properties": {
+        "pre_commit": {
+          "type": "array",
+          "description": "Commands to run before each git commit.",
+          "items": { "type": "string" },
+          "default": ["npm run lint", "npm run typecheck", "npm test"]
+        },
+        "pre_push": {
+          "type": "array",
+          "description": "Commands to run before each git push.",
+          "items": { "type": "string" },
+          "default": ["npm run build"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "authority": {
+      "type": "object",
+      "description": "Agent authority rules (who can do what).",
+      "properties": {
+        "git_local": {
+          "type": "array",
+          "description": "Agents allowed to perform local git operations.",
+          "items": { "type": "string" },
+          "default": ["all"]
+        },
+        "git_push": {
+          "type": "array",
+          "description": "Agents allowed to push to remote.",
+          "items": { "type": "string" },
+          "default": ["devops"]
+        },
+        "git_pr": {
+          "type": "array",
+          "description": "Agents allowed to create pull requests.",
+          "items": { "type": "string" },
+          "default": ["devops"]
+        },
+        "create_stories": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["pm", "po", "sm"]
+        },
+        "architecture_decisions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["architect"]
+        },
+        "quality_verdicts": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["qa"]
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

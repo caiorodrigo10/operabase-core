@@ -1,0 +1,78 @@
+# operabase.yaml - Central configuration for your Operabase project
+# Schema: schemas/operabase.schema.json
+
+# Required fields
+version: "1.0"
+name: "My Project"
+language: pt                        # en | pt | es
+
+# Multi-tenant mode (optional)
+# multi_tenant: false
+# tenant_discovery: filesystem
+# tenant_gate: mandatory
+
+# Composio integration (optional)
+# composio:
+#   enabled: false
+
+# Memory system
+memory:
+  global: "memory/MEMORY.md"
+  squad_pattern: "squads/{squad}/memory/{agent}.md"
+
+# Obsidian vault (optional)
+# obsidian:
+#   enabled: false
+#   vault_path: "./segundocerebro"
+#   vault_name: "Segundo Cerebro"
+#   date_format: "DD-MM-YYYY"
+#   structure:
+#     inbox: "00-Inbox"
+#     projects: "01-Projects"
+#     resources: "03-Resources"
+#     daily: "05-Daily"
+#     journal: "08-Journal"
+#   vault_git: false
+
+# RAG - Retrieval Augmented Generation (optional)
+# rag:
+#   enabled: false
+#   provider: auto
+#   auto_index: true
+#   index_paths:
+#     - "memory/**/*.md"
+#     - "docs/knowledge/**/*.md"
+
+# Error handling strategies
+error_handling:
+  default_strategy: ESCALATE        # RETRY | ESCALATE | SKIP
+  retryable_errors:
+    - timeout
+    - rate_limit
+    - ECONNRESET
+  max_retries: 2
+  retry_delay_seconds: 5
+
+# Installed squads
+squads:
+  core:
+    - dev-squad                     # or full-dev-squad (mutually exclusive)
+  extras: []                        # e.g. finance-squad, media-buying-squad
+
+# Quality gates
+gates:
+  pre_commit:
+    - "npm run lint"
+    - "npm run typecheck"
+    - "npm test"
+  pre_push:
+    - "npm run build"
+
+# Agent authority (who can do what)
+authority:
+  git_local: [all]
+  git_push: [devops]
+  git_pr: [devops]
+  create_stories: [pm, po, sm]
+  architecture_decisions: [architect]
+  quality_verdicts: [qa]

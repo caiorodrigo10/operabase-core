@@ -1,0 +1,111 @@
+workflow:
+  id: spec-pipeline
+  name: Spec Pipeline - Requirements to Specification
+  squad: dev-squad
+  version: "1.0"
+  description: >-
+    Pipeline that transforms informal requirements into executable specifications.
+    Orchestrates 5 phases: Gather → Assess → Research → Write → Critique.
+
+  type: pipeline
+
+  config:
+    maxRetries: 2
+    retryDelay: 1000
+    strictGate: true
+    outputDir: docs/stories/{storyId}/spec/
+
+  complexity_phases:
+    SIMPLE:
+      steps: [gather, spec, critique]
+      estimated_time: "30-60 min"
+    STANDARD:
+      steps: [gather, assess, research, spec, critique, plan]
+      estimated_time: "2-4 hours"
+    COMPLEX:
+      steps: [gather, assess, research, spec, critique_1, revise, critique_2, plan]
+      estimated_time: "4-8 hours"
+
+  sequence:
+    - step: gather
+      phase: 1
+      skill: pm
+      description: "Collect and structure requirements"
+      outputs: [requirements.json]
+      elicit: true
+      on_success:
+        next: assess
+      on_failure:
+        action: halt
+
+    - step: assess
+      phase: 2
+      skill: architect
+      description: "Evaluate complexity across 5 dimensions"
+      outputs: [complexity.json]
+      skip_if: "source === 'simple'"
+      on_success:
+        next: research
+
+    - step: research
+      phase: 3
+      skill: analyst
+      description: "Research external dependencies"
+      outputs: [research.json]
+      skip_if: "complexity === 'SIMPLE'"
+      on_success:
+        next: spec
+
+    - step: spec
+      phase: 4
+      skill: pm
+      description: "Generate complete spec.md from artifacts"
+      outputs: [spec.md]
+      on_success:
+        next: critique
+
+    - step: critique
+      phase: 5
+      skill: qa
+      description: "Quality gate - validate spec against requirements"
+      outputs: [critique.json]
+      gate: true
+      on_verdict:
+        APPROVED:
+          next: plan
+        NEEDS_REVISION:
+          action: return_to_spec
+          max_iterations: 2
+        BLOCKED:
+          action: halt
+          escalate_to: "@architect"
+
+    - step: revise
+      phase: "5b"
+      skill: pm
+      description: "Apply critique feedback to improve spec"
+      condition: "complexity === 'COMPLEX' OR verdict === 'NEEDS_REVISION'"
+      on_success:
+        next: critique_2
+
+    - step: plan
+      phase: 6
+      skill: architect
+      description: "Generate implementation plan from approved spec"
+      condition: "verdict === 'APPROVED'"
+      outputs: [plan.json]
+
+  error_handling:
+    missing_story_id:
+      message: "Story ID is required"
+      action: prompt
+    phase_failed:
+      message: "Phase {phase} failed"
+      action: halt
+
+  metadata:
+    author: "Operabase port"
+    version: 1.0.0
+    tags:
+      - spec-pipeline
+      - orchestration

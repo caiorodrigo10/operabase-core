@@ -1,0 +1,120 @@
+workflow:
+  id: brownfield-fullstack
+  name: Brownfield Full-Stack Enhancement
+  squad: dev-squad
+  version: "1.0"
+  description: >-
+    Workflow for enhancing existing full-stack applications with new features,
+    modernization, or significant changes.
+  type: brownfield
+
+  metadata:
+    elicit: true
+    confirmation_required: true
+
+  phases:
+    - phase_1: Enhancement Classification & Routing
+    - phase_2: Planning & Documentation
+    - phase_3: Document Sharding
+    - phase_4: Development Cycle
+
+  sequence:
+    - phase: 1
+      name: Enhancement Classification & Routing
+
+    - id: analyst-classify-enhancement
+      step: enhancement_classification
+      skill: analyst
+      action: classify enhancement scope
+      elicit: true
+      notes: |
+        Determine enhancement complexity:
+        - Single story (< 4 hours) → brownfield-create-story task
+        - Small feature (1-3 stories) → brownfield-create-epic task
+        - Major enhancement → continue with full workflow
+
+    - id: routing-decision
+      step: routing_decision
+      meta: routing
+      condition: based_on_classification
+      routes:
+        single_story:
+          skill: pm
+          notes: "Create single story for immediate implementation."
+        small_feature:
+          skill: pm
+          notes: "Create focused epic with 1-3 stories."
+        major_enhancement:
+          continue: to_next_step
+
+    - phase: 2
+      name: Planning & Documentation
+
+    - id: analyst-check-documentation
+      step: documentation_check
+      skill: analyst
+      action: check existing documentation
+      condition: major_enhancement_path
+
+    - id: architect-analyze-project
+      step: project_analysis
+      skill: architect
+      action: analyze existing project
+      condition: documentation_inadequate
+
+    - id: pm-create-prd
+      skill: pm
+      creates: prd.md
+      requires: existing_documentation_or_analysis
+
+    - id: architect-create-architecture
+      skill: architect
+      creates: architecture.md
+      requires: prd.md
+      condition: architecture_changes_needed
+
+    - id: po-validate-artifacts
+      skill: po
+      validates: all_artifacts
+
+    - phase: 3
+      name: Document Sharding
+
+    - id: po-shard-documents
+      skill: po
+      action: shard_documents
+      requires:
+        - prd.md
+        - architecture.md
+
+    - phase: 4
+      name: Development Cycle
+
+    - id: sm-create-story
+      skill: sm
+      action: create_story
+      repeats: for_each_epic_or_enhancement
+
+    - id: dev-implement-story
+      skill: dev
+      action: implement_story
+      requires: story.md
+
+    - id: qa-review-implementation
+      skill: qa
+      action: review_implementation
+      optional: true
+
+    - meta: repeat
+      target_steps: [sm-create-story, dev-implement-story, qa-review-implementation]
+      condition: stories_remaining
+
+    - meta: end
+
+  metadata:
+    author: "Operabase port"
+    version: 1.0.0
+    tags:
+      - brownfield
+      - fullstack
+      - enhancement

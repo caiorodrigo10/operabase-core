@@ -1,0 +1,13 @@
+# Dev Squad Quality Gates
+# Extends global gates from operabase.yaml
+
+gates:
+  extends: global
+
+  additional:
+    pre_complete:
+      - type: coverage_check
+        description: "Minimum test coverage of 80%"
+        rule: "coverage >= 80%"
+      - type: story_checkboxes
+        description: "All story acceptance criteria checked"

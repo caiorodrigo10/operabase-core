@@ -1,0 +1,124 @@
+workflow:
+  id: story-development-cycle
+  name: Story Development Cycle
+  squad: dev-squad
+  version: "1.0"
+  description: >-
+    Ciclo completo de desenvolvimento de stories. Automatiza o fluxo desde a criação
+    até a entrega com quality gate: create → validate → implement → QA review.
+  type: generic
+  project_types:
+    - greenfield
+    - brownfield
+    - feature-development
+    - bug-fix
+    - enhancement
+
+  metadata:
+    elicit: true
+    confirmation_required: true
+
+  phases:
+    - phase_1: Story Creation
+    - phase_2: Story Validation
+    - phase_3: Implementation
+    - phase_4: QA Review
+
+  sequence:
+    - step: create_story
+      id: create
+      phase: 1
+      skill: sm
+      action: Criar próxima story
+      notes: |
+        Scrum Master cria a próxima story do backlog.
+        - Define acceptance criteria claros
+        - Estabelece escopo e dependências
+        - Story inicia com status "Draft"
+      outputs:
+        - story_file
+        - story_id
+      next: validate
+
+    - step: validate_story
+      id: validate
+      phase: 2
+      skill: po
+      action: Validar story (10 checks)
+      requires: create
+      notes: |
+        Product Owner valida a story com checklist de 10 pontos:
+        - [ ] 1. Título claro e objetivo
+        - [ ] 2. Descrição completa
+        - [ ] 3. Acceptance criteria testáveis (Given/When/Then)
+        - [ ] 4. Escopo bem definido
+        - [ ] 5. Dependências mapeadas
+        - [ ] 6. Estimativa de complexidade adequada
+        - [ ] 7. Valor de negócio identificado
+        - [ ] 8. Riscos documentados
+        - [ ] 9. Critérios de Done claros
+        - [ ] 10. Alinhamento com PRD/Epic
+
+        Aprovada → Status "Ready"
+        Rejeitada → Retorna para SM com feedback
+      outputs:
+        - validation_report
+        - story_status
+      next: implement
+      on_failure: create
+
+    - step: implement_story
+      id: implement
+      phase: 3
+      skill: dev
+      action: Implementar story
+      requires: validate
+      notes: |
+        Dev implementa a story validada:
+        - Analisa acceptance criteria
+        - Planeja implementação técnica
+        - Escreve código seguindo padrões
+        - Cria/atualiza testes unitários
+        - Atualiza File List na story
+        - Marca story como "In Review"
+      outputs:
+        - implementation_files
+        - test_results
+        - commit_hash
+      next: review
+
+    - step: qa_review
+      id: review
+      phase: 4
+      skill: qa
+      action: Review final + quality gate
+      requires: implement
+      notes: |
+        QA executa review final com quality gate:
+        - [ ] Code review
+        - [ ] Testes unitários passando
+        - [ ] Acceptance criteria atendidos
+        - [ ] Sem regressões
+        - [ ] Performance aceitável
+        - [ ] Segurança verificada
+
+        Aprovada → Status "Done"
+        Rejeitada → Retorna para Dev com checklist
+      outputs:
+        - qa_report
+        - quality_gate_status
+        - story_final_status
+      next: complete
+      on_failure: implement
+
+    - workflow_end:
+      id: complete
+      action: story_complete
+
+  metadata:
+    author: "Operabase port"
+    version: 1.0.0
+    tags:
+      - story
+      - development-cycle
+      - quality-gate

@@ -1,0 +1,13 @@
+# Composio Tool Mapping Template
+# Place in: squads/{squad-name}/config/composio-tools.yaml
+#
+# Define which Composio tools each agent role can access.
+# Reference: docs/integrations/composio.md
+
+tools:
+  # agent-role-name:
+  #   read:
+  #     - TOOL_NAME_GET_DATA
+  #   write:
+  #     - TOOL_NAME_CREATE_ITEM
+  #   requires_approval: false  # Set true for destructive operations

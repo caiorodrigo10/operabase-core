@@ -1,0 +1,23 @@
+# Quality Gates Template for Squads
+# Place in: squads/{squad-name}/config/quality-gates.yaml
+#
+# Gates inherit from operabase.yaml global gates.
+# Use 'extends' to inherit, 'additional' to add, 'override' to replace.
+#
+# Reference: Operabase Spec Section 13
+
+gates:
+  extends: global                    # Inherit gates from operabase.yaml
+
+  additional:                        # Add squad-specific gates
+    pre_commit: []                   # Additional pre-commit checks
+    pre_push: []                     # Additional pre-push checks
+    # pre_complete:                  # Custom stages
+    #   - type: coverage_check
+    #     description: "Minimum test coverage"
+    #     rule: "coverage >= 80%"
+    #   - type: story_checkboxes
+    #     description: "All story checkboxes checked"
+
+  # override:                        # Override global gates (use sparingly)
+  #   pre_commit: null               # Set to null to disable a stage entirely

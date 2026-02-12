@@ -1,0 +1,113 @@
+workflow:
+  id: greenfield-fullstack
+  name: Greenfield Full-Stack Application Development
+  squad: dev-squad
+  version: "1.0"
+  description: >-
+    Workflow for building full-stack applications from concept to development.
+    Includes environment bootstrap, discovery, planning, and development cycle.
+  type: greenfield
+
+  metadata:
+    elicit: true
+    confirmation_required: true
+
+  phases:
+    - phase_0: Environment Bootstrap
+    - phase_1: Discovery & Planning
+    - phase_2: Document Sharding
+    - phase_3: Development Cycle
+
+  sequence:
+    - phase: 0
+      name: Environment Bootstrap
+
+    - id: devops-environment-bootstrap
+      skill: devops
+      action: environment_bootstrap
+      creates:
+        - operabase.yaml
+        - .gitignore
+        - README.md
+        - package.json
+
+    - phase: 1
+      name: Discovery & Planning
+
+    - id: analyst-project-brief
+      skill: analyst
+      creates: project-brief.md
+      requires: environment_bootstrap_complete
+
+    - id: pm-create-prd
+      skill: pm
+      creates: prd.md
+      requires: project-brief.md
+
+    - id: ux-create-frontend-spec
+      skill: ux-design-expert
+      creates: front-end-spec.md
+      requires: prd.md
+
+    - id: architect-create-architecture
+      skill: architect
+      creates: fullstack-architecture.md
+      requires:
+        - prd.md
+        - front-end-spec.md
+
+    - id: po-validate-artifacts
+      skill: po
+      validates: all_artifacts
+
+    - phase: 2
+      name: Document Sharding
+
+    - id: po-shard-documents
+      skill: po
+      action: shard_documents
+      requires:
+        - prd.md
+        - front-end-spec.md
+        - fullstack-architecture.md
+
+    - phase: 3
+      name: Development Cycle
+
+    - id: sm-create-story
+      skill: sm
+      action: create_story
+      repeats: for_each_epic
+
+    - id: dev-implement-story
+      skill: dev
+      action: implement_story
+
+    - id: qa-review-implementation
+      skill: qa
+      action: review_implementation
+      optional: true
+
+    - meta: repeat
+      target_steps: [sm-create-story, dev-implement-story, qa-review-implementation]
+      condition: stories_remaining
+
+    - meta: end
+
+  decision_guidance:
+    when_to_use:
+      - Building production-ready applications
+      - Complex feature requirements
+      - Need comprehensive documentation
+    when_not_to_use:
+      - API-only project (use greenfield-service)
+      - Frontend-only project (use greenfield-ui)
+      - Enhancing existing app (use brownfield-fullstack)
+
+  metadata:
+    author: "Operabase port"
+    version: 1.0.0
+    tags:
+      - greenfield
+      - fullstack
+      - development

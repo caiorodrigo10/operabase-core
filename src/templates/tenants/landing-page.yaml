@@ -1,0 +1,128 @@
+# =============================================================================
+# TENANT TEMPLATE: LANDING PAGE
+# =============================================================================
+# Operabase Skills Framework
+# Copy this file to tenants/{tenant-id}/landing-page.yaml
+# Fill in all required fields before using
+# Used by: @lp (Landing Page Builder Agent)
+# =============================================================================
+
+tenant:
+  id: "{tenant-id}"           # Unique identifier (lowercase, no spaces)
+  name: "{Company Name}"       # Display name
+  created_at: "DD-MM-YYYY"
+  updated_at: "DD-MM-YYYY"
+
+# =============================================================================
+# BRAND IDENTITY
+# =============================================================================
+
+brand:
+  name: "{Brand Name}"
+  tagline: "{Brand tagline}"
+  logo_url: ""                 # Path to logo file or URL
+  favicon_url: ""              # Path to favicon or URL
+
+# =============================================================================
+# DESIGN TOKENS
+# =============================================================================
+
+design_tokens:
+  colors:
+    primary: "#7c3aed"         # Main brand color (CTA buttons, highlights)
+    secondary: "#a78bfa"       # Secondary/accent color
+    accent: "#4ade80"          # Success/check color
+    background: "#0c0c0c"      # Page background
+    background_alt: "#0f0f0f"  # Alternate section background
+    text: "#ffffff"            # Primary text color
+    muted: "#9ca3af"           # Muted/secondary text color
+
+  typography:
+    heading_font: "Space Grotesk"   # Google Font name for headings
+    body_font: "Inter"              # Google Font name for body text
+    heading_weights: ["700"]
+    body_weights: ["400", "500", "600"]
+
+  style:
+    border_radius: "rounded-2xl"    # Tailwind border radius class
+    card_bg: "bg-white/5"           # Card background class
+    card_border: "border-white/10"  # Card border class
+    theme: "dark"                   # dark | light
+
+# =============================================================================
+# SEO
+# =============================================================================
+
+seo:
+  title_pattern: "{Page Title} | {Brand Name}"
+  meta_description: ""
+  og_image: ""                 # OpenGraph image URL
+  lang: "pt-BR"                # Language code
+
+# =============================================================================
+# ANALYTICS (optional -- leave empty to disable)
+# =============================================================================
+
+analytics:
+  posthog_key: ""              # PostHog project key
+  posthog_host: "https://us.i.posthog.com"
+  meta_pixel_id: ""            # Meta/Facebook Pixel ID
+
+# =============================================================================
+# CTA CONFIGURATION
+# =============================================================================
+
+cta:
+  primary_url: "#"             # Main CTA destination (checkout, form, etc.)
+  primary_text: "Get Started"  # CTA button text
+  nav_text: "Get Started"      # Nav bar CTA text
+
+# =============================================================================
+# EVENT / PRODUCT DETAILS (for event landing pages)
+# =============================================================================
+
+event:
+  date: ""                     # e.g., "15-16 Mar"
+  year: ""                     # e.g., "2025"
+  time: ""                     # e.g., "09:00 - 17:00"
+  timezone: ""                 # e.g., "UTC", "Brasilia"
+  format: ""                   # e.g., "Online", "In-person"
+  format_detail: ""            # e.g., "Live", "Recorded"
+
+# =============================================================================
+# PRICING (for pricing section)
+# =============================================================================
+
+pricing:
+  currency: "USD"              # USD | BRL | EUR
+  amount: "49"
+  label: "One-time investment"
+  guarantee: "7-day money-back guarantee"
+
+# =============================================================================
+# SOCIAL LINKS
+# =============================================================================
+
+social:
+  instagram: ""
+  youtube: ""
+  linkedin: ""
+  twitter: ""
+
+# =============================================================================
+# CONTACT
+# =============================================================================
+
+contact:
+  email: ""
+  whatsapp: ""
+
+# =============================================================================
+# FOOTER
+# =============================================================================
+
+footer:
+  tagline: "{Short description}"
+  copyright: "{Company Name}"
+  terms_url: "#"
+  privacy_url: "#"
