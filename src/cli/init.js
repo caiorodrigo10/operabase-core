@@ -253,10 +253,8 @@ export async function runInit() {
   allCreatedPaths.push(...hookPaths);
 
   // 4. Copy squad content (agents, tasks, workflows, templates, config)
-  if (answers.dev_squad !== 'none') {
-    const squadPaths = copySquads(targetDir, { dev_squad: answers.dev_squad });
-    allCreatedPaths.push(...squadPaths);
-  }
+  const squadPaths = await copySquads(targetDir, { dev_squad: answers.dev_squad, extra_squads: answers.extra_squads });
+  allCreatedPaths.push(...squadPaths);
 
   // 5. Generate SKILL.md files for all agents in the selected squad
   if (answers.dev_squad !== 'none') {
