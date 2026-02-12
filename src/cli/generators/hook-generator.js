@@ -1,6 +1,10 @@
-import { writeFile, mkdir, access, chmod } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, access, chmod } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { logger } from '../../utils/logger.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const TEMPLATES_DIR = resolve(__dirname, '../../templates');
 
 /**
  * Check if a file exists.
@@ -16,19 +20,16 @@ async function exists(p) {
   }
 }
 
-const PRE_COMMIT_HOOK = `#!/bin/bash
-# Operabase pre-commit hook
-# Runs quality gates before each commit
-
-npx operabase gates --stage pre_commit
-`;
-
-const PRE_PUSH_HOOK = `#!/bin/bash
-# Operabase pre-push hook
-# Runs quality gates before each push
-
-npx operabase gates --stage pre_push
-`;
+/**
+ * Read a hook template, falling back to inline content.
+ */
+async function readHookTemplate(templateName, fallback) {
+  try {
+    return await readFile(resolve(TEMPLATES_DIR, 'hooks', templateName), 'utf-8');
+  } catch {
+    return fallback;
+  }
+}
 
 /**
  * Generate Claude Code hook scripts.
@@ -41,26 +42,27 @@ export async function generateHooks(targetDir) {
 
   logger.heading('Creating hooks...');
 
-  // Ensure hooks directory exists
   await mkdir(hooksDir, { recursive: true });
 
-  // Pre-commit hook
+  // Pre-commit hook (template has exit code handling)
   const preCommitPath = resolve(hooksDir, 'pre-commit.sh');
   if (await exists(preCommitPath)) {
     logger.warn('Skipped (already exists): .claude/hooks/pre-commit.sh');
   } else {
-    await writeFile(preCommitPath, PRE_COMMIT_HOOK, 'utf-8');
+    const content = await readHookTemplate('pre-commit.sh', '#!/bin/bash\nnpx operabase gates --stage pre_commit\n');
+    await writeFile(preCommitPath, content, 'utf-8');
     await chmod(preCommitPath, 0o755);
     createdPaths.push('.claude/hooks/pre-commit.sh');
     logger.success('Created: .claude/hooks/pre-commit.sh');
   }
 
-  // Pre-push hook
+  // Pre-push hook (template has exit code handling)
   const prePushPath = resolve(hooksDir, 'pre-push.sh');
   if (await exists(prePushPath)) {
     logger.warn('Skipped (already exists): .claude/hooks/pre-push.sh');
   } else {
-    await writeFile(prePushPath, PRE_PUSH_HOOK, 'utf-8');
+    const content = await readHookTemplate('pre-push.sh', '#!/bin/bash\nnpx operabase gates --stage pre_push\n');
+    await writeFile(prePushPath, content, 'utf-8');
     await chmod(prePushPath, 0o755);
     createdPaths.push('.claude/hooks/pre-push.sh');
     logger.success('Created: .claude/hooks/pre-push.sh');

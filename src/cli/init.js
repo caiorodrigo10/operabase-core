@@ -1,6 +1,6 @@
 import { select, checkbox, confirm, input } from '@inquirer/prompts';
 import chalk from 'chalk';
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { logger } from '../utils/logger.js';
@@ -8,9 +8,14 @@ import { generateFolders } from './generators/folder-generator.js';
 import { generateConfig } from './generators/config-generator.js';
 import { generateHooks } from './generators/hook-generator.js';
 import { generateManifest } from './generators/manifest-generator.js';
+import { generateSkills } from './generators/skill-generator.js';
+import { generateCommands } from './generators/command-generator.js';
+import { generateClaudeMd } from './generators/claude-md-generator.js';
+import { copySquads } from './generators/squad-copier.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const TEMPLATES_DIR = resolve(__dirname, '../templates');
 
 // --- Agent name maps for uniqueness enforcement (T2.3) ---
 
@@ -235,7 +240,7 @@ export async function runInit() {
   const targetDir = process.cwd();
   const allCreatedPaths = [];
 
-  // 1. Generate folder structure
+  // 1. Generate folder structure (dirs, constitution.md, MEMORY.md)
   const folderPaths = await generateFolders(targetDir, answers);
   allCreatedPaths.push(...folderPaths);
 
@@ -243,26 +248,67 @@ export async function runInit() {
   const configPath = await generateConfig(targetDir, answers);
   if (configPath) allCreatedPaths.push(configPath);
 
-  // 3. Generate hooks
+  // 3. Generate hooks (from templates with exit code handling)
   const hookPaths = await generateHooks(targetDir);
   allCreatedPaths.push(...hookPaths);
 
-  // 4. Generate manifest (must be last — hashes all created files)
-  await generateManifest(targetDir, allCreatedPaths);
+  // 4. Copy squad content (agents, tasks, workflows, templates, config)
+  if (answers.dev_squad !== 'none') {
+    const squadPaths = copySquads(targetDir, { dev_squad: answers.dev_squad });
+    allCreatedPaths.push(...squadPaths);
+  }
 
-  // 5. Generate Obsidian vault structure if configured
+  // 5. Generate SKILL.md files for all agents in the selected squad
+  if (answers.dev_squad !== 'none') {
+    const agents = getAgentsForSquad(answers.dev_squad);
+    const squadName = answers.dev_squad === 'basic' ? 'dev-squad' : 'full-dev-squad';
+    generateSkills(targetDir, { squad: squadName, agents });
+  }
+
+  // 6. Generate namespace command files
+  if (answers.dev_squad !== 'none') {
+    const namespaces = getNamespacesForSquad(answers.dev_squad);
+    generateCommands(targetDir, { namespaces });
+  }
+
+  // 7. Generate .claude/CLAUDE.md with populated squads/agents tables
+  generateClaudeMd(targetDir, {
+    name: answers.projectName,
+    projectName: answers.projectName,
+    language: answers.language,
+    dev_squad: answers.dev_squad,
+    extra_squads: answers.extra_squads,
+  });
+
+  // 8. Copy story and knowledge templates
+  copyTemplateDir('stories', targetDir);
+  copyTemplateDir('knowledge', targetDir);
+
+  // 9. Generate Obsidian vault structure if configured
   if (answers.obsidian && answers.obsidian_vault_path) {
     const vaultDir = resolve(targetDir, answers.obsidian_vault_path);
     try {
-      const vaultStructure = JSON.parse(readFileSync(resolve(__dirname, '../../src/templates/obsidian/vault-structure.json'), 'utf-8'));
+      const vaultStructure = JSON.parse(readFileSync(resolve(TEMPLATES_DIR, 'obsidian/vault-structure.json'), 'utf-8'));
+
+      // Create directories
       for (const dir of vaultStructure.directories || []) {
         const dirPath = resolve(vaultDir, dir);
         if (!existsSync(dirPath)) {
           mkdirSync(dirPath, { recursive: true });
         }
       }
+
+      // Create .gitkeep files in empty directories
+      for (const dir of vaultStructure.gitkeep || []) {
+        const gitkeepPath = resolve(vaultDir, dir, '.gitkeep');
+        if (!existsSync(gitkeepPath)) {
+          mkdirSync(resolve(vaultDir, dir), { recursive: true });
+          writeFileSync(gitkeepPath, '');
+        }
+      }
+
       // Copy Home.md
-      const homeSrc = resolve(__dirname, '../../src/templates/obsidian/Home.md');
+      const homeSrc = resolve(TEMPLATES_DIR, 'obsidian/Home.md');
       const homeDest = resolve(vaultDir, 'Home.md');
       if (!existsSync(homeDest) && existsSync(homeSrc)) {
         writeFileSync(homeDest, readFileSync(homeSrc, 'utf-8'));
@@ -273,12 +319,12 @@ export async function runInit() {
     }
   }
 
-  // 6. Generate .mcp.json if Composio enabled
+  // 10. Generate .mcp.json if Composio enabled
   if (answers.composio) {
     const mcpPath = resolve(targetDir, '.mcp.json');
     if (!existsSync(mcpPath)) {
       try {
-        const mcpTemplate = readFileSync(resolve(__dirname, '../../src/templates/mcp-json.json'), 'utf-8');
+        const mcpTemplate = readFileSync(resolve(TEMPLATES_DIR, 'mcp-json.json'), 'utf-8');
         writeFileSync(mcpPath, mcpTemplate);
         logger.success('  Created .mcp.json for Composio');
       } catch (e) {
@@ -287,6 +333,27 @@ export async function runInit() {
     }
   }
 
+  // 11. Copy tenant templates if multi-tenant enabled
+  if (answers.multi_tenant) {
+    const tenantTemplatesDir = resolve(TEMPLATES_DIR, 'tenants');
+    const targetTemplatesDir = resolve(targetDir, 'tenants/_templates');
+    if (existsSync(tenantTemplatesDir)) {
+      mkdirSync(targetTemplatesDir, { recursive: true });
+      const files = readdirSync(tenantTemplatesDir);
+      for (const file of files) {
+        const dest = resolve(targetTemplatesDir, file);
+        if (!existsSync(dest)) {
+          writeFileSync(dest, readFileSync(resolve(tenantTemplatesDir, file), 'utf-8'));
+          allCreatedPaths.push(`tenants/_templates/${file}`);
+        }
+      }
+      logger.success(`  Copied ${files.length} tenant templates`);
+    }
+  }
+
+  // 12. Generate manifest (must be LAST — hashes all created files)
+  await generateManifest(targetDir, allCreatedPaths);
+
   // Final message
   console.log();
   logger.heading('Operabase initialized successfully!');
@@ -294,7 +361,100 @@ export async function runInit() {
   logger.info(`${allCreatedPaths.length} files/directories created.`);
   logger.info('Next steps:');
   logger.dim('  1. Review operabase.yaml');
-  logger.dim('  2. Run: npx operabase validate');
+  logger.dim('  2. Run: npx operabase doctor');
   logger.dim('  3. Run: npx operabase status');
+  logger.dim('  4. Activate an agent: /dev *help');
   logger.blank();
+}
+
+// ── Helper: agent definitions per squad type ──
+
+function getAgentsForSquad(squadType) {
+  const base = [
+    { id: 'dev', name: 'Dex', description: 'Code implementation, debugging, refactoring', commands: ['*help', '*task'] },
+    { id: 'qa', name: 'Quinn', description: 'Testing, code review, quality gates', commands: ['*help', '*task'] },
+    { id: 'devops', name: 'Gage', description: 'Git push, CI/CD, releases. ONLY agent authorized to push.', commands: ['*help', '*task'] },
+    { id: 'orchestrator', name: 'Orchestrator', description: 'Pipeline coordination and workflow execution', commands: ['*help', '*run'] },
+    { id: 'kairos', name: 'Kairos', description: 'Agent Teams orchestration for parallel execution', commands: ['*help', '*assemble'] },
+    { id: 'squad-creator', name: 'Craft', description: 'Create new Operabase squads from scratch', commands: ['*help', '*create'] },
+  ];
+
+  if (squadType === 'complete') {
+    return [
+      ...base,
+      { id: 'architect', name: 'Aria', description: 'System architecture, API design, tech decisions', commands: ['*help', '*task'] },
+      { id: 'pm', name: 'Morgan', description: 'Product management, roadmap, stakeholders', commands: ['*help', '*task'] },
+      { id: 'po', name: 'Pax', description: 'Backlog management, stories, acceptance criteria', commands: ['*help', '*create-story'] },
+      { id: 'sm', name: 'River', description: 'Sprint planning, ceremonies, process', commands: ['*help', '*task'] },
+      { id: 'data-engineer', name: 'Dara', description: 'Database design, migrations, queries', commands: ['*help', '*task'] },
+      { id: 'ux-design-expert', name: 'Uma', description: 'UX/UI design, design tokens, accessibility', commands: ['*help', '*task'] },
+      { id: 'scheduler', name: 'Scheduler', description: 'Schedule tasks, cron jobs, recurring automation', commands: ['*help', '*schedule'] },
+    ];
+  }
+
+  // Basic squad also gets scheduler
+  return [
+    ...base,
+    { id: 'scheduler', name: 'Scheduler', description: 'Schedule tasks, cron jobs, recurring automation', commands: ['*help', '*schedule'] },
+  ];
+}
+
+function getNamespacesForSquad(squadType) {
+  const namespaces = [
+    {
+      ns: 'dev',
+      commands: [
+        { name: 'help', agent: 'dev', description: 'Show dev agent commands and capabilities' },
+        { name: 'commit', agent: 'devops', description: 'Create a well-formatted commit with quality gates' },
+        { name: 'lint', agent: 'qa', description: 'Run linting via quality gates' },
+        { name: 'test', agent: 'qa', description: 'Run tests via quality gates' },
+      ],
+    },
+    {
+      ns: 'ops',
+      commands: [
+        { name: 'push', agent: 'devops', description: 'Push to remote (devops authority required)' },
+        { name: 'pr', agent: 'devops', description: 'Create a pull request' },
+      ],
+    },
+  ];
+
+  if (squadType === 'complete') {
+    namespaces.push({
+      ns: 'product',
+      commands: [
+        { name: 'story', agent: 'po', description: 'Create a new development story' },
+        { name: 'backlog', agent: 'po', description: 'View and manage the product backlog' },
+        { name: 'sprint', agent: 'sm', description: 'Plan or review a sprint' },
+      ],
+    });
+  }
+
+  return namespaces;
+}
+
+/**
+ * Copy template README and _template.md into target directory.
+ */
+function copyTemplateDir(dirName, targetDir) {
+  const srcDir = resolve(TEMPLATES_DIR, dirName);
+  if (!existsSync(srcDir)) return;
+
+  const targetPath = dirName === 'stories' ? resolve(targetDir, 'docs/stories') : resolve(targetDir, `docs/${dirName}`);
+
+  // Copy README.md
+  const readmeSrc = resolve(srcDir, 'README.md');
+  const readmeDest = resolve(targetPath, 'README.md');
+  if (existsSync(readmeSrc) && !existsSync(readmeDest)) {
+    mkdirSync(targetPath, { recursive: true });
+    writeFileSync(readmeDest, readFileSync(readmeSrc, 'utf-8'));
+  }
+
+  // Copy _template.md
+  const tmplSrc = resolve(srcDir, '_template.md');
+  const tmplDest = resolve(targetPath, '_template.md');
+  if (existsSync(tmplSrc) && !existsSync(tmplDest)) {
+    mkdirSync(targetPath, { recursive: true });
+    writeFileSync(tmplDest, readFileSync(tmplSrc, 'utf-8'));
+  }
 }
